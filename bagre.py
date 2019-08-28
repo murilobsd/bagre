@@ -37,6 +37,7 @@ class Bagre:
             self.data = self.data.decode()
             self.sendPingResponse()
             sleep(0.5)
+            print(self.data)
 
 if __name__ == '__main__':
     server = 'irc.freenode.net'
