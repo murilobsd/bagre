@@ -18,26 +18,12 @@ class Bagre:
 
     def sendCommand(self, cmd):
         cmd = cmd + '\r\n'
-        self.s.send(cmd)
+        self.s.send(cmd.encode())
 
     def sendPingResponse(self):
         if self.data.find('PING') != -1:
             self.sendCommand('PONG ' + self.data.split()[1])
             sleep(15)
-
-    def Parse(self, cmd):
-        tp = cmd.split(' ')
-        numargs = len(tp)
-        fmt = []
-
-        if numargs == 0:
-            self.sendCommand(cmd)
-        else:
-            for i in range(numargs):
-                fmt.append(tp[i] + ' ')
-            fmt = ' '.join(fmt)
-            self.sendCommand(fmt)
-
 
     def run(self):
         self.sendCommand('NICK ' + self.nick)
@@ -48,6 +34,7 @@ class Bagre:
 
         while self.close == False:
             self.data = self.s.recv(4096)
+            self.data = self.data.decode()
             self.sendPingResponse()
             sleep(0.5)
 
