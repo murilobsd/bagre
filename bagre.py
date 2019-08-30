@@ -1,50 +1,76 @@
-from socket import socket, AF_INET, SOCK_STREAM
-from threading import Thread
-from time import sleep
+import argparse
+import logging
 
-class Bagre:
-    def __init__(self, server, nick, name, mail, channel):
-        self.s = socket(AF_INET, SOCK_STREAM)
-        self.s.connect((server,6667))
-        sleep(0.5)
-        self.s.recv(4096)
-        self.nick = nick
-        self.name = name
-        self.mail = mail
-        self.data = ''
-        self.channel = channel
-        self.command = None
-        self.close = False
+import irc.strings
 
-    def sendCommand(self, cmd):
-        cmd = cmd + '\r\n'
-        self.s.send(cmd.encode())
+import ib3
+import ib3.auth
+import ib3.connection
+import ib3.nick
 
-    def sendPingResponse(self):
-        if self.data.find('PING') != -1:
-            self.sendCommand('PONG ' + self.data.split()[1])
-            sleep(15)
+import os
 
-    def run(self):
-        self.sendCommand('NICK ' + self.nick)
-        self.sendCommand('USER ' + self.nick + ' ' + self.name + ' ' + self.mail + ' : OpenBSD-BR')
-        self.sendCommand('JOIN ' + self.channel)
 
-        self.sendCommand('PRIVMSG ' + self.channel + ' Puff!')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(name)s %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%dT%H:%M:%SZ'
+)
+logging.captureWarnings(True)
 
-        while self.close == False:
-            self.data = self.s.recv(4096)
-            self.data = self.data.decode()
-            self.sendPingResponse()
-            sleep(0.5)
-            print(self.data)
+logger = logging.getLogger('saslbot')
+
+nick = os.environ['NICK']
+passwd = os.environ['PASSWD']
+channel = os.environ['CHANNEL']
+
+class Bagre(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
+    def on_privmsg(self, conn, event):
+        self.do_command(conn, event, event.arguments[0])
+
+    def on_pubmsg(self, conn, event):
+        args = event.arguments[0].split(':', 1)
+        if len(args) > 1:
+            to = irc.strings.lower(args[0])
+            if to == irc.strings.lower(conn.get_nickname()):
+                self.do_command(conn, event, args[1].strip())
+        
+        toNick = event.target
+        if toNick == conn.get_nickname():
+            toNick = event.source.nick
+
+        if 'windows' in args[0] or 'Windows' in args[0]:
+            conn.privmsg(toNick, 'mesmo pagando é uma bosta')
+        
+
+    def do_command(self, conn, event, cmd):
+        to = event.target
+        if to == conn.get_nickname():
+            to = event.source.nick
+
+        if cmd == 'disconnect':
+            self.disconnect()
+        elif cmd == 'die':
+            self.die()
+        elif cmd == '!help':
+            conn.privmsg(to, 'Ainda não tenho um help ou ajuda para mostrar')
+        else:
+            conn.privmsg(to, 'What does "{}" mean?'.format(cmd))
+
 
 if __name__ == '__main__':
-    server = 'irc.freenode.net'
-    nick = 'bagre'
-    name = 'openbsd-br'
-    mail =  'shazaum@gmail.com'
-    channel = '#openbsd-br'
-
-    bot = Bagre(server, nick , name , mail, channel)
-    bot.run()
+    bot = Bagre(
+        server_list=[('chat.freenode.net', 6697)],
+        nickname=nick,
+        realname=nick,
+        ident_password=passwd,
+        channels=[channel],
+    )
+    try:
+        bot.start()
+    except KeyboardInterrupt:
+        bot.disconnect('KeyboardInterrupt!')
+    except Exception:
+        logger.exception('Killed by unhandled exception')
+        bot.disconnect('Exception!')
+        raise SystemExit()
