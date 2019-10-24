@@ -54,9 +54,14 @@ class Bagre(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
             self.die()
         elif cmd == '!help':
             conn.privmsg(to, 'Ainda não tenho um help ou ajuda para mostrar')
+        elif cmd == '!fortune':
+            conn.privmsg(to, fortune_br())
         else:
             conn.privmsg(to, 'What does "{}" mean?'.format(cmd))
 
+    def fortune_br(self):
+        fortuneResult = os.popen('fortune fortune-br')
+        return fortuneResult
 
 if __name__ == '__main__':
     bot = Bagre(
