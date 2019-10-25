@@ -1,5 +1,7 @@
 MOD := bagre
 
+check-style: lint pep8
+
 lint:
 	pylint $(MOD)
 pep8:

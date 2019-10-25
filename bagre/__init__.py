@@ -1,3 +1,7 @@
+"""
+    Bragre é o bot do canal #openbsd-br na rede FreeNode, ele tem
+    o objetivo de facilitar algumas tarefas para o pessoal do canal.
+"""
 #
 # Copyright (c) 2019 Murilo Ijanc' <mbsd@m0x.ru>
 # Copyright (c) 2019 Guilherme <ggrigon@users.noreply.github.com>
@@ -29,4 +33,4 @@ logging.basicConfig(
 )
 logging.captureWarnings(True)
 
-logger = logging.getLogger('bot')
+LOGGER = logging.getLogger('bot')
