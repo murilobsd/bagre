@@ -1,3 +1,2 @@
-pymongo
 ib3==0.2.0
 fortune
