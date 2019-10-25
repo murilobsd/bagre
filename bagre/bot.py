@@ -1,3 +1,7 @@
+"""
+    O módulo bot é responsável pelas tarefas relacionadas ao bot,
+    como por exemplo autenticar, conexão, envio de mensagens.
+"""
 #
 # Copyright (c) 2019 Murilo Ijanc' <mbsd@m0x.ru>
 # Copyright (c) 2019 Guilherme <ggrigon@users.noreply.github.com>
@@ -15,47 +19,46 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-import ib3
-import ib3.auth
-import ib3.connection
-import ib3.nick
-import irc.strings
+from ib3 import auth, connection, nick, Bot as ib3bot
+from irc import strings as istrings
 
 
-class Bot(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
+class Bot(auth.SASL, nick.Regain, connection.SSL, ib3bot):
     """Bot Class"""
 
     def on_privmsg(self, conn, event):
+        """mensagem privadas"""
         self.do_command(conn, event, event.arguments[0])
 
     def on_pubmsg(self, conn, event):
+        """checa se alguem citou windows nas mensagens do canal"""
         args = event.arguments[0].split(':', 1)
         if len(args) > 1:
-            to = irc.strings.lower(args[0])
-            if to == irc.strings.lower(conn.get_nickname()):
+            to_user = istrings.lower(args[0])
+            if to_user == istrings.lower(conn.get_nickname()):
                 self.do_command(conn, event, args[1].strip())
 
-        toNick = event.target
-        if toNick == conn.get_nickname():
-            toNick = event.source.nick
+        to_nick = event.target
+        if to_nick == conn.get_nickname():
+            to_nick = event.source.nick
 
         if 'windows' in args[0] or 'Windows' in args[0]:
-            conn.privmsg(toNick, 'mesmo pagando é uma bosta')
+            conn.privmsg(to_nick, 'mesmo pagando é uma bosta')
 
     def do_command(self, conn, event, cmd):
-        to = event.target
-        if to == conn.get_nickname():
-            to = event.source.nick
+        """executa o comando"""
+        target = event.target
+        if target == conn.get_nickname():
+            target = event.source.nick
 
         if cmd == 'disconnect':
             self.disconnect()
         elif cmd == 'die':
             self.die()
         elif cmd == '!help':
-            conn.privmsg(to, 'Ainda não tenho um help ou ajuda para mostrar')
+            conn.privmsg(
+                target, 'Ainda não tenho um help ou ajuda para mostrar')
         elif cmd == '!fortune':
-            txt = os.popen('fortune fortune-br').read()
-            for txt in txt.split('\n'):
-                conn.privmsg(to, txt)
+            conn.privmsg(to, 'reformulando...')
         else:
-            conn.privmsg(to, 'What does "{}" mean?'.format(cmd))
+            conn.privmsg(target, 'What does "{}" mean?'.format(cmd))
