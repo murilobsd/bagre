@@ -2,11 +2,11 @@
 # Copyright (c) 2019 Murilo Ijanc' <mbsd@m0x.ru>
 # Copyright (c) 2019 Guilherme <ggrigon@users.noreply.github.com>
 # Copyright (c) 2019 Renato dos Santos <shazaum@gmail.com>
-# 
+#
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
 # copyright notice and this permission notice appear in all copies.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -21,8 +21,9 @@ import ib3.connection
 import ib3.nick
 import irc.strings
 
+
 class Bot(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
-	"""Bot Class"""
+    """Bot Class"""
 
     def on_privmsg(self, conn, event):
         self.do_command(conn, event, event.arguments[0])
@@ -33,14 +34,13 @@ class Bot(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
             to = irc.strings.lower(args[0])
             if to == irc.strings.lower(conn.get_nickname()):
                 self.do_command(conn, event, args[1].strip())
-        
+
         toNick = event.target
         if toNick == conn.get_nickname():
             toNick = event.source.nick
 
         if 'windows' in args[0] or 'Windows' in args[0]:
             conn.privmsg(toNick, 'mesmo pagando é uma bosta')
-        
 
     def do_command(self, conn, event, cmd):
         to = event.target
@@ -59,4 +59,3 @@ class Bot(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
                 conn.privmsg(to, txt)
         else:
             conn.privmsg(to, 'What does "{}" mean?'.format(cmd))
-
