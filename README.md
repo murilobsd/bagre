@@ -49,7 +49,7 @@ optional arguments:
 
 ### Rodando o bot
 
-```sh
+```
 bot -s irc.freenode.org -p 6667 -n meubot -p minhasenha -c #openbsd-br,#openbsd
 ```
 
