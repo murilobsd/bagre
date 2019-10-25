@@ -1,7 +1,20 @@
+# vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+*~
+tags
+[._]*.un~
+
+# python
 __pycache__/
 *.py[cod]
 *$py.class
-
 .Python
 build/
 develop-eggs/
@@ -21,7 +34,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
 htmlcov/
 .tox/
 .nox/
@@ -34,9 +46,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-
 docs/_build/
-
 target/
 .env
 .venv
