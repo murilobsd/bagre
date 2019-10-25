@@ -1,30 +1,29 @@
-import argparse
-import logging
-
-import irc.strings
-
+#
+# Copyright (c) 2019 Murilo Ijanc' <mbsd@m0x.ru>
+# Copyright (c) 2019 Guilherme <ggrigon@users.noreply.github.com>
+# Copyright (c) 2019 Renato dos Santos <shazaum@gmail.com>
+# 
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
 import ib3
 import ib3.auth
 import ib3.connection
 import ib3.nick
+import irc.strings
 
-import os
+class Bot(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
+	"""Bot Class"""
 
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(name)s %(levelname)s: %(message)s',
-    datefmt='%Y-%m-%dT%H:%M:%SZ'
-)
-logging.captureWarnings(True)
-
-logger = logging.getLogger('saslbot')
-
-nick = os.environ['NICK']
-passwd = os.environ['PASSWD']
-channel = os.environ['CHANNEL']
-
-class Bagre(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
     def on_privmsg(self, conn, event):
         self.do_command(conn, event, event.arguments[0])
 
@@ -61,19 +60,3 @@ class Bagre(ib3.auth.SASL, ib3.nick.Regain, ib3.connection.SSL, ib3.Bot):
         else:
             conn.privmsg(to, 'What does "{}" mean?'.format(cmd))
 
-if __name__ == '__main__':
-    bot = Bagre(
-        server_list=[('chat.freenode.net', 6697)],
-        nickname=nick,
-        realname=nick,
-        ident_password=passwd,
-        channels=[channel],
-    )
-    try:
-        bot.start()
-    except KeyboardInterrupt:
-        bot.disconnect('KeyboardInterrupt!')
-    except Exception:
-        logger.exception('Killed by unhandled exception')
-        bot.disconnect('Exception!')
-        raise SystemExit()
