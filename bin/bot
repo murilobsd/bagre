@@ -15,28 +15,61 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-import os
 import argparse
+import os
+import sys
 
-from bagre import Bot
+from bagre import Bot, LOGGER, __version__
 
-nick = os.environ['NICK']
-passwd = os.environ['PASSWD']
-channel = os.environ['CHANNEL']
+server = os.environ.get('SERVER', 'irc.freenode.org')
+port = os.environ.get('PORT', 6667)
+nick = os.environ.get('NICK', None)
+passwd = os.environ.get('PASSWD', None)
+channels = os.environ.get('CHANNEL', None)
 
-if __name__ == '__main__':
-    bot = Bot(
-        server_list=[('chat.freenode.net', 6697)],
-        nickname=nick,
-        realname=nick,
-        ident_password=passwd,
-        channels=[channel],
-    )
+
+def parse_command_line(argv):
+    """Argumentos da linha de comando"""
+    formatter_class = argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description="Bot do canal #openbsd-br",
+                                     formatter_class=formatter_class)
+    parser.add_argument("--version", action="version",
+                        version="%(prog)s {}".format(__version__))
+    parser.add_argument("-v", "--verbose", dest="verbose_count",
+                        action="count", default=0,
+                        help="increases log verbosity for each occurence.")
+    parser.add_argument('-s', '--server', help='host do servidor, irc.freenode.org') 
+    parser.add_argument('-p', '--port', help='porta, 6667') 
+    parser.add_argument('-n', '--nick', help='nickname') 
+    parser.add_argument('-P', '--passwd', help='senha') 
+    parser.add_argument('-c', '--channels', help='lista de canais, #openbsd-br,#openbsd') 
+    arguments = parser.parse_args(argv[1:])
+    LOGGER.setLevel(max(3 - arguments.verbose_count, 0) * 10)
+    return arguments
+
+
+def main(argv):
+    """Main program. Sets up logging and do some work."""
+    bot = None
     try:
+        arguments = parse_command_line(argv)
+        bot = Bot(
+            server_list=[(server, PORT)],
+            nickname=nick,
+            realname=nick,
+            ident_password=passwd,
+            channels=[channels],
+        )
         bot.start()
     except KeyboardInterrupt:
         bot.disconnect('KeyboardInterrupt!')
     except Exception:
-        logger.exception('Killed by unhandled exception')
-        bot.disconnect('Exception!')
+        LOGGER.exception('Killed by unhandled exception')
+        if bot:
+            bot.disconnect('Exception!')
         raise SystemExit()
+    return 0;
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
