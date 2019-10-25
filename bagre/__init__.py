@@ -20,13 +20,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 import logging
+import sys
 
 from .bot import Bot
 
-__all__ = ["Bot"]
-__version__ = "0.0.1"
-
 logging.basicConfig(
+    stream=sys.stderr,
     level=logging.DEBUG,
     format='%(asctime)s %(name)s %(levelname)s: %(message)s',
     datefmt='%Y-%m-%dT%H:%M:%SZ'
@@ -34,3 +33,6 @@ logging.basicConfig(
 logging.captureWarnings(True)
 
 LOGGER = logging.getLogger('bot')
+
+__all__ = ["Bot", "LOGGER"]
+__version__ = "0.0.1"
